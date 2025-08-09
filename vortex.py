@@ -134,7 +134,7 @@ def cmd_qw(args):
         try:
             with open(filename, 'r') as f:
                 content = f.read()
-            print(content, end='')
+            print(content)  # <-- Changed here: removed end='' so newline prints
         except Exception as e:
             print(f"Error reading file: {e}")
     else:
