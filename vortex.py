@@ -12,7 +12,7 @@ env_vars = {}
 
 COMMANDS = ["say", "sv", "fd", "ld", "qw", "cl", "dl", "ed", "help", "exit", "version"]
 
-VORTEXOS_VERSION = "1.0.0"
+VORTEXOS_VERSION = "1.0.1"
 
 def completer(text, state):
     buffer = readline.get_line_buffer()
