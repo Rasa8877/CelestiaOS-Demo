@@ -28,7 +28,7 @@ This project is a demonstration of a simple shell environment with custom comman
 1. Clone the repository:  
    ```bash
    git clone https://github.com/Rasa8877/VortexOS-Demo.git
-```
+   ```
 
 2. Change directory:
 
