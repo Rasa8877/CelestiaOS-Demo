@@ -13,7 +13,7 @@ env_vars = {}
 
 COMMANDS = ["say", "sv", "fd", "ld", "qw", "cl", "dl", "ed", "help", "exit", "version", "run"]
 
-CELESTIA_VERSION = "1.0.2"
+CELESTIA_VERSION = "1.0.3"
 
 RESET = "\033[0m"
 BOLD = "\033[1m"
@@ -70,9 +70,9 @@ def get_prompt():
     else:
         cwd_display = cwd
     if cwd_display:
-        return f"{BOLD}{CYAN}VortexOS{RESET}:{GREEN}{cwd_display}{RESET}> "
+        return f"{BOLD}{CYAN}CelestiaOS{RESET}:{GREEN}{cwd_display}{RESET}> "
     else:
-        return f"{BOLD}{CYAN}VortexOS{RESET}> "
+        return f"{BOLD}{CYAN}CelestiaOS{RESET}> "
 
 def print_splash():
     splash = (
@@ -362,7 +362,7 @@ Available commands:
   run app [args...]     - Run external app with arguments
   help                  - Show this help
   version               - Show version
-  exit                  - Exit VortexOS
+  exit                  - Exit CelestiaOS
 """
     print(help_text)
 
