@@ -8,7 +8,7 @@ This project is a demonstration of a simple shell environment with custom comman
 ## Features
 
 - Custom shell prompt with environment variable support  
-- Basic commands: `say`, `sv`, `fd`, `ld`, `qw`, `cl`, `dl`, `ed`, `help`, and `exit`  
+- Basic commands: `say`, `sv`, `fd`, `ld`, `qw`, `cl`, `dl`, `ed`, `help`, `run`, and `exit`  
 - Simple built-in text editor powered by `curses`  
 - Command autocomplete for commands and file paths  
 - Clear screen and file/folder operations  
