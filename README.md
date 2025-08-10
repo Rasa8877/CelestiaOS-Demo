@@ -1,6 +1,6 @@
 # CelestiaOS-Demo
 
-Welcome to **Celestia-Demo**, a very early, minimal terminal-based operating system prototype written in Python.  
+Welcome to **CelestiaOS-Demo**, a very early, minimal terminal-based operating system prototype written in Python.  
 This project is a demonstration of a simple shell environment with custom commands and a built-in text editor — a foundational stepping stone toward a full terminal OS.
 
 ---
