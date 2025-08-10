@@ -2,7 +2,7 @@
 
 
 a = Analysis(
-    ['vortex.py'],
+    ['celestia.py'],
     pathex=[],
     binaries=[],
     datas=[],
@@ -22,7 +22,7 @@ exe = EXE(
     a.binaries,
     a.datas,
     [],
-    name='vortex',
+    name='celestia',
     debug=False,
     bootloader_ignore_signals=False,
     strip=False,

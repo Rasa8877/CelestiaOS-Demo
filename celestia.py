@@ -13,7 +13,7 @@ env_vars = {}
 
 COMMANDS = ["say", "sv", "fd", "ld", "qw", "cl", "dl", "ed", "help", "exit", "version", "run"]
 
-VORTEXOS_VERSION = "1.0.2"
+CELESTIA_VERSION = "1.0.2"
 
 RESET = "\033[0m"
 BOLD = "\033[1m"
@@ -77,13 +77,14 @@ def get_prompt():
 def print_splash():
     splash = (
     r"""
-                  _              ___  __    
- /\   /\___  _ __| |_ _____  __ /___\/ _\   
- \ \ / / _ \| '__| __/ _ \ \/ ///  //\ \    
-  \ V / (_) | |  | ||  __/>  </ \_// _\ \   
-   \_/ \___/|_|   \__\___/_/\_\___/  \__/   
-
-    Welcome to VortexOS v""" + VORTEXOS_VERSION + """
+     ______  _______  __       _______     _______.___________. __       ___       ______        _______.
+     /      ||   ____||  |     |   ____|   /       |           ||  |     /   \     /  __  \      /       |
+    |  ,----'|  |__   |  |     |  |__     |   (----`---|  |----`|  |    /  ^  \   |  |  |  |    |   (----`
+    |  |     |   __|  |  |     |   __|     \   \       |  |     |  |   /  /_\  \  |  |  |  |     \   \    
+    |  `----.|  |____ |  `----.|  |____.----)   |      |  |     |  |  /  _____  \ |  `--'  | .----)   |   
+    \______||_______||_______||_______|_______/       |__|     |__| /__/     \__\ \______/  |_______/    
+                                                                                                      
+    Welcome to CelestiaOS v""" + CELESTIA_VERSION + """
     Type 'help' to get started.
 """
 )
@@ -366,7 +367,7 @@ Available commands:
     print(help_text)
 
 def cmd_version(args):
-    print(f"VortexOS version {VORTEXOS_VERSION}")
+    print(f"CelestiaOS version {CELESTIA_VERSION}")
 
 def main():
     print_splash()
