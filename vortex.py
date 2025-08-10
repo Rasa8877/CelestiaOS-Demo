@@ -7,12 +7,32 @@ import shutil
 import curses
 import glob
 import time
+import subprocess
 
 env_vars = {}
 
-COMMANDS = ["say", "sv", "fd", "ld", "qw", "cl", "dl", "ed", "help", "exit", "version"]
+COMMANDS = ["say", "sv", "fd", "ld", "qw", "cl", "dl", "ed", "help", "exit", "version", "run"]
 
-VORTEXOS_VERSION = "1.0.1"
+VORTEXOS_VERSION = "1.0.2"
+
+RESET = "\033[0m"
+BOLD = "\033[1m"
+CYAN = "\033[36m"
+GREEN = "\033[32m"
+YELLOW = "\033[33m"
+
+# Detect installed apps from PATH
+def get_installed_apps():
+    app_names = set()
+    for path_dir in os.getenv("PATH", "").split(os.pathsep):
+        if os.path.isdir(path_dir):
+            for file in os.listdir(path_dir):
+                file_path = os.path.join(path_dir, file)
+                if os.access(file_path, os.X_OK) and not os.path.isdir(file_path):
+                    app_names.add(file)
+    return sorted(app_names)
+
+APP_LIST = get_installed_apps()
 
 def completer(text, state):
     buffer = readline.get_line_buffer()
@@ -22,6 +42,8 @@ def completer(text, state):
     else:
         if readline.get_begidx() == 0:
             options = [cmd + ' ' for cmd in COMMANDS if cmd.startswith(text)]
+        elif line[0] == "run":
+            options = [app + ' ' for app in APP_LIST if app.startswith(text)]
         else:
             before_cursor = buffer[:readline.get_endidx()]
             tokens = before_cursor.split()
@@ -37,6 +59,7 @@ def completer(text, state):
 readline.set_completer(completer)
 readline.parse_and_bind('tab: complete')
 
+# UPDATED get_prompt with colors, moved OUTSIDE main()
 def get_prompt():
     cwd = os.getcwd()
     home = os.path.expanduser("~")
@@ -47,9 +70,9 @@ def get_prompt():
     else:
         cwd_display = cwd
     if cwd_display:
-        return f"VortexOS:{cwd_display}> "
+        return f"{BOLD}{CYAN}VortexOS{RESET}:{GREEN}{cwd_display}{RESET}> "
     else:
-        return "VortexOS> "
+        return f"{BOLD}{CYAN}VortexOS{RESET}> "
 
 def print_splash():
     splash = (
@@ -134,7 +157,7 @@ def cmd_qw(args):
         try:
             with open(filename, 'r') as f:
                 content = f.read()
-            print(content)  # <-- Changed here: removed end='' so newline prints
+            print(content)
         except Exception as e:
             print(f"Error reading file: {e}")
     else:
@@ -242,80 +265,65 @@ def run_editor(filename):
             elif key == curses.KEY_F4:
                 if not saved:
                     stdscr.addstr(height-2, 0, "Unsaved changes! Press F4 again to quit without saving, any other key to cancel.")
-                    stdscr.clrtoeol()
                     stdscr.refresh()
-                    k2 = stdscr.getch()
-                    if k2 == curses.KEY_F4:
+                    confirm = stdscr.getch()
+                    if confirm == curses.KEY_F4:
                         break
-                    else:
-                        continue
                 else:
                     break
-            elif key == curses.KEY_UP:
-                if cursor_y > 0:
+            elif key in (curses.KEY_BACKSPACE, 127):
+                if cursor_x > 0:
+                    lines[cursor_y] = lines[cursor_y][:cursor_x-1] + lines[cursor_y][cursor_x:]
+                    cursor_x -= 1
+                    saved = False
+                elif cursor_y > 0:
+                    prev_len = len(lines[cursor_y-1])
+                    lines[cursor_y-1] += lines[cursor_y]
+                    del lines[cursor_y]
                     cursor_y -= 1
-                    if cursor_y < offset_y:
-                        offset_y -= 1
-                    cursor_x = min(cursor_x, len(lines[cursor_y]))
-            elif key == curses.KEY_DOWN:
-                if cursor_y < len(lines) - 1:
-                    cursor_y += 1
-                    if cursor_y - offset_y >= height - 1:
-                        offset_y += 1
-                    cursor_x = min(cursor_x, len(lines[cursor_y]))
+                    cursor_x = prev_len
+                    saved = False
+            elif key == curses.KEY_DC:
+                if cursor_x < len(lines[cursor_y]):
+                    lines[cursor_y] = lines[cursor_y][:cursor_x] + lines[cursor_y][cursor_x+1:]
+                    saved = False
+                elif cursor_y + 1 < len(lines):
+                    lines[cursor_y] += lines[cursor_y+1]
+                    del lines[cursor_y+1]
+                    saved = False
             elif key == curses.KEY_LEFT:
                 if cursor_x > 0:
                     cursor_x -= 1
                 elif cursor_y > 0:
                     cursor_y -= 1
                     cursor_x = len(lines[cursor_y])
-                    if cursor_y < offset_y:
-                        offset_y -= 1
             elif key == curses.KEY_RIGHT:
                 if cursor_x < len(lines[cursor_y]):
                     cursor_x += 1
-                elif cursor_y < len(lines) - 1:
+                elif cursor_y + 1 < len(lines):
                     cursor_y += 1
                     cursor_x = 0
-                    if cursor_y - offset_y >= height - 1:
-                        offset_y += 1
-            elif key in (curses.KEY_BACKSPACE, 127, 8):
-                if cursor_x > 0:
-                    line = lines[cursor_y]
-                    lines[cursor_y] = line[:cursor_x-1] + line[cursor_x:]
-                    cursor_x -= 1
-                    saved = False
-                elif cursor_y > 0:
-                    prev_line_len = len(lines[cursor_y-1])
-                    lines[cursor_y-1] += lines[cursor_y]
-                    lines.pop(cursor_y)
+            elif key == curses.KEY_UP:
+                if cursor_y > 0:
                     cursor_y -= 1
-                    cursor_x = prev_line_len
+                    cursor_x = min(cursor_x, len(lines[cursor_y]))
                     if cursor_y < offset_y:
                         offset_y -= 1
-                    saved = False
-            elif key == curses.KEY_DC:
-                line = lines[cursor_y]
-                if cursor_x < len(line):
-                    lines[cursor_y] = line[:cursor_x] + line[cursor_x+1:]
-                    saved = False
-                elif cursor_y < len(lines) - 1:
-                    lines[cursor_y] += lines[cursor_y+1]
-                    lines.pop(cursor_y+1)
-                    saved = False
-            elif key == 10:
-                line = lines[cursor_y]
-                new_line = line[cursor_x:]
-                lines[cursor_y] = line[:cursor_x]
+            elif key == curses.KEY_DOWN:
+                if cursor_y + 1 < len(lines):
+                    cursor_y += 1
+                    cursor_x = min(cursor_x, len(lines[cursor_y]))
+                    if cursor_y >= offset_y + height - 1:
+                        offset_y += 1
+            elif key == curses.KEY_ENTER or key == 10 or key == 13:
+                new_line = lines[cursor_y][cursor_x:]
+                lines[cursor_y] = lines[cursor_y][:cursor_x]
                 lines.insert(cursor_y+1, new_line)
                 cursor_y += 1
                 cursor_x = 0
-                if cursor_y - offset_y >= height - 1:
-                    offset_y += 1
                 saved = False
-            elif 32 <= key <= 126:
-                line = lines[cursor_y]
-                lines[cursor_y] = line[:cursor_x] + chr(key) + line[cursor_x:]
+            elif 0 <= key <= 255:
+                lines[cursor_y] = lines[cursor_y][:cursor_x] + chr(key) + lines[cursor_y][cursor_x:]
                 cursor_x += 1
                 saved = False
 
@@ -325,23 +333,37 @@ def cmd_ed(args):
     if not args:
         print("ed usage: ed filename")
         return
-    filename = args[0]
-    run_editor(filename)
+    run_editor(args[0])
+
+def cmd_run(args):
+    if not args:
+        print("run usage: run appname [args...]")
+        return
+    appname = args[0]
+    appargs = args[1:]
+    try:
+        result = subprocess.run([appname] + appargs)
+    except FileNotFoundError:
+        print(f"run: command not found: {appname}")
 
 def cmd_help(args):
-    print("Supported commands:")
-    print("  say [text]          - Print text (supports $var for variables)")
-    print("  sv var=value        - Set environment variable")
-    print("  fd [dir]            - Change directory")
-    print("  ld [dir]            - List directory contents")
-    print("  qw filename [text]  - Write text to file or read if no text")
-    print("  cl                  - Clear screen")
-    print("  dl filename [-y]    - Delete file with optional confirmation")
-    print("  dl -fl folder [-y]  - Delete folder recursively")
-    print("  ed filename         - Open simple editor")
-    print("  version             - Show VortexOS version")
-    print("  help                - Show this help")
-    print("  exit                - Exit shell")
+    help_text = """
+Available commands:
+  say [text or $var]    - Print text or variable
+  sv var=value          - Set variable
+  fd [path]             - Change directory
+  ld [path]             - List directory contents
+  qw filename [text]    - Write text to file or read file if no text
+  cl                    - Clear screen
+  dl filename [-y]      - Delete file with optional yes flag
+  dl -fl foldername [-y]- Delete folder with optional yes flag
+  ed filename           - Edit file in text editor
+  run app [args...]     - Run external app with arguments
+  help                  - Show this help
+  version               - Show version
+  exit                  - Exit VortexOS
+"""
+    print(help_text)
 
 def cmd_version(args):
     print(f"VortexOS version {VORTEXOS_VERSION}")
@@ -350,8 +372,8 @@ def main():
     print_splash()
     while True:
         try:
-            prompt = get_prompt()
-            line = input(prompt)
+            prompt = get_prompt()   # get prompt string
+            line = input(prompt)    # read input line using prompt
         except EOFError:
             print()
             break
@@ -380,6 +402,8 @@ def main():
             cmd_dl(args)
         elif cmd == "ed":
             cmd_ed(args)
+        elif cmd == "run":
+            cmd_run(args)
         elif cmd == "help":
             cmd_help(args)
         elif cmd == "version":
