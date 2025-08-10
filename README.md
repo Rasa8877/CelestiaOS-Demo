@@ -33,7 +33,7 @@ This project is a demonstration of a simple shell environment with custom comman
 2. Change directory:
 
    ```bash
-   cd CelestiaOS
+   cd CelestiaOS-Demo-main
    ```
 
 3. Run the shell:
