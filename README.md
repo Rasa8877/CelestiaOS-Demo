@@ -1,4 +1,4 @@
-# VortexOS-Demo
+# CelestiaOS-Demo
 
 Welcome to **VortexOS-Demo**, a very early, minimal terminal-based operating system prototype written in Python.  
 This project is a demonstration of a simple shell environment with custom commands and a built-in text editor — a foundational stepping stone toward a full terminal OS.
@@ -27,19 +27,19 @@ This project is a demonstration of a simple shell environment with custom comman
 
 1. Clone the repository:  
    ```bash
-   git clone https://github.com/Rasa8877/VortexOS-Demo.git
+   git clone https://github.com/Rasa8877/CelestiaOS-Demo.git
    ```
 
 2. Change directory:
 
    ```bash
-   cd VortexOS-Demo
+   cd CelestiaOS-Demo
    ```
 
 3. Run the shell:
 
    ```bash
-   python3 vortex.py
+   python3 celestia.py
    ```
 
 ---
