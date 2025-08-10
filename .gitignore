@@ -22,3 +22,7 @@ Thumbs.db
 # Python logs and caches
 *.log
 *.cache
+
+# Made by Pyinstaller
+build/
+dist/
